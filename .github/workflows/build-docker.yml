@@ -11,5 +11,6 @@ jobs:
         run: docker build ./api/ -t hmnomaan0/devops-qr-code-api:latest
       - name: push image to docker hub
         run: |
+          docker login -u hmnomaan0 -p ${{ secrets.DOCKER_HUB_TOKEN }}
           docker push hmnomaan0/devops-qr-code-api:latest
           
