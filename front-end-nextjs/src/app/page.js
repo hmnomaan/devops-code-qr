@@ -6,17 +6,31 @@ import axios from 'axios';
 export default function Home() {
   const [url, setUrl] = useState('');
   const [qrCodeUrl, setQrCodeUrl] = useState('');
+  const [error, setError] = useState('');
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      const response = await axios.post(`http://localhost:8000/generate-qr/?url=${url}`);
-      setQrCodeUrl(response.data.qr_code_url);
-    } catch (error) {
-      console.error('Error generating QR Code:', error);
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  setError('');
+  try {
+    const encoded = encodeURIComponent(url);
+    const response = await axios.post(`http://localhost:8000/generate-qr/?url=${encoded}`);
+    console.log('response', response);
+    if (!response || !response.data) {
+      console.error('Empty response', response);
+      return;
     }
-  };
-
+    const { qr_code_url } = response.data;
+    if (!qr_code_url) {
+      console.error('qr_code_url missing', response.data);
+      setError('No QR URL returned from server');
+      return;
+    }
+    setQrCodeUrl(qr_code_url);
+  } catch (error) {
+    console.error('API error', error?.response?.status, error?.response?.data || error.message);
+    setError(error?.response?.data?.error || error?.message || 'Request failed');
+  }
+};
   return (
     <div style={styles.container}>
       <h1 style={styles.title}>QR Code Generator</h1>
@@ -30,6 +44,7 @@ export default function Home() {
         />
         <button type="submit" style={styles.button}>Generate QR Code</button>
       </form>
+      {error && <div style={{color: 'salmon', marginTop: 12}}>{error}</div>}
       {qrCodeUrl && <img src={qrCodeUrl} alt="QR Code" style={styles.qrCode} />}
     </div>
   );
