@@ -1,6 +1,16 @@
 name: Build and Publish image to Docker Hub
 on:
-  [workflow_dispatch, push]
+# # Triggers the workflow on push or manual run 
+#   [workflow_dispatch, push]
+
+# Triggers the workflow on push to main branch
+  push:
+    branches:
+      - main
+    paths:
+        - 'api/Dockerfile'
+        - 'front-end-nextjs/Dockerfile'
+
 jobs:
   publish_images:
     runs-on: ubuntu-latest
@@ -8,9 +18,12 @@ jobs:
       - name: checkout
         uses: actions/checkout@v4
       - name: build image
-        run: docker build ./api/ -t hmnomaan0/devops-qr-code-api:latest
+        run: |
+          docker build ./api/ -t hmnomaan0/devops-qr-code-api:latest
+          docker build ./front-end-nextjs/ -t hmnomaan0/devops-qr-code-frontend:latest  
       - name: push image to docker hub
         run: |
           docker login -u hmnomaan0 -p ${{ secrets.DOCKER_HUB_TOKEN }}
           docker push hmnomaan0/devops-qr-code-api:latest
+          docker push hmnomaan0/devops-qr-code-frontend:latest
           
