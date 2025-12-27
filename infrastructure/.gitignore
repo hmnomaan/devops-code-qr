@@ -44,4 +44,5 @@ terraform.rc
 # planout
 
 # Kubernetes cluster dump files
-cluster-dump
+
+cluster-dump/
