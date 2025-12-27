@@ -46,3 +46,4 @@ terraform.rc
 # Kubernetes cluster dump files
 
 cluster-dump/
+cluster-dump/*
