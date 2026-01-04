@@ -1,3 +1,7 @@
+import pytest
+
+# Skip these tests if FastAPI (or its testclient) isn't installed in the environment.
+pytest.importorskip("fastapi")
 from fastapi.testclient import TestClient
 from main import app
 
