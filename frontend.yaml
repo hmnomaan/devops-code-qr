@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: qr-frontend
-        image: hmnomaan0/devops-qr-code-frontend:latest
+        image: hmnomaan0/devops-qr-code-frontend:v1
         ports:
         - containerPort: 3000
 

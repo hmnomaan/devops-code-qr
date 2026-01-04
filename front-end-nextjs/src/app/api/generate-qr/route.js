@@ -1,11 +1,8 @@
 import { NextResponse } from 'next/server';
 import axios from 'axios';
 
-// Server-side API route that forwards requests to the backend QR API.
-// Use the `QR_API_URL` environment variable (set in your deployment or .env) to
-// point to the backend. Defaults to localhost for local development.
 export async function POST(request) {
-  // Support both JSON body { url } and query param ?url=...
+  // Accept either JSON body { url } or ?url=... query param
   let url;
   try {
     const body = await request.json().catch(() => null);
@@ -25,11 +22,10 @@ export async function POST(request) {
 
   try {
     const response = await axios.post(
-      `${backend.replace(/\/+$/, '')}/generate-qr/`,
+      `${backend.replace(/\/+$/,'')}/generate-qr/`,
       { url: String(url) },
       { timeout: 10000 }
     );
-
     return NextResponse.json(response.data, { status: response.status });
   } catch (err) {
     if (err.response) {

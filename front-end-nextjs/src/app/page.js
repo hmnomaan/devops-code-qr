@@ -6,37 +6,17 @@ import axios from 'axios';
 export default function Home() {
   const [url, setUrl] = useState('');
   const [qrCodeUrl, setQrCodeUrl] = useState('');
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
 
-const handleSubmit = async (e) => {
-  e.preventDefault();
-  setError('');
-  setQrCodeUrl('');
-  const trimmed = url.trim();
-  if (!trimmed) {
-    setError('Please enter a URL');
-    return;
-  }
-  if (!/^https?:\/\//i.test(trimmed)) {
-    setError('URL must start with http:// or https://');
-    return;
-  }
-  setLoading(true);
-  try {
-    const response = await axios.post('/api/generate-qr', { url: trimmed });
-    if (!response || !response.data || !response.data.qr_code_url) {
-      setError('No QR URL returned from server');
-      return;
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await axios.post('/api/generate-qr', { url: url });
+      setQrCodeUrl(response.data.qr_code_url);
+    } catch (error) {
+      console.error('Error generating QR Code:', error);
     }
-    setQrCodeUrl(response.data.qr_code_url);
-  } catch (err) {
-    console.error('API error', err?.response?.status, err?.response?.data || err.message);
-    setError(err?.response?.data?.error || err?.message || 'Request failed');
-  } finally {
-    setLoading(false);
-  }
-};
+  };
+
   return (
     <div style={styles.container}>
       <h1 style={styles.title}>QR Code Generator</h1>
@@ -48,9 +28,8 @@ const handleSubmit = async (e) => {
           placeholder="Enter URL like https://example.com"
           style={styles.input}
         />
-        <button type="submit" style={styles.button} disabled={loading}>{loading ? 'Generating...' : 'Generate QR Code'}</button>
+        <button type="submit" style={styles.button}>Generate QR Code</button>
       </form>
-      {error && <div style={{color: 'salmon', marginTop: 12}}>{error}</div>}
       {qrCodeUrl && <img src={qrCodeUrl} alt="QR Code" style={styles.qrCode} />}
     </div>
   );

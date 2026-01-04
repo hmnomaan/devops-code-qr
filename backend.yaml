@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: qr-api
-        image: hmnomaan0/devops-qr-code-api:latest
+        image: hmnomaan0/devops-qr-code-api:v1
         ports:
         - containerPort: 80
 ---
