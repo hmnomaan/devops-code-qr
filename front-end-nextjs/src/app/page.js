@@ -13,7 +13,7 @@ const handleSubmit = async (e) => {
   setError('');
   try {
     const encoded = encodeURIComponent(url);
-    const response = await axios.post(`http://localhost:8000/generate-qr/?url=${encoded}`);
+    const response = await axios.post(`/api/generate-qr/?url=${encoded}`);
     console.log('response', response);
     if (!response || !response.data) {
       console.error('Empty response', response);
