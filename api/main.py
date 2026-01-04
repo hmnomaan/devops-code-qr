@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
 import qrcode
 import boto3
 import os
@@ -39,16 +40,22 @@ app.add_middleware(
 # AWS S3 Configuration (include region_name if provided)
 s3 = boto3.client(
     's3',
-    aws_access_key_id=os.getenv("AWS_ACCESS_KEY"),
-    aws_secret_access_key=os.getenv("AWS_SECRET_KEY"),
-    region_name=os.getenv("AWS_DEFAULT_REGION"),
+    aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID") or os.getenv("AWS_ACCESS_KEY"),
+    aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY") or os.getenv("AWS_SECRET_KEY"),
+    region_name=os.getenv("AWS_DEFAULT_REGION") or os.getenv("AWS_REGION"),
 )
 
-bucket_name = 'hmnomaan-devops'  # Add your bucket name here
+# Use environment variable for bucket name so it's configurable
+bucket_name = os.getenv("BUCKET_NAME") or 'hmnomaan-devops'
+
+
+class UrlRequest(BaseModel):
+    url: str
 
 
 @app.post("/generate-qr/")
-async def generate_qr(url: str):
+async def generate_qr(payload: UrlRequest):
+    url = payload.url
     # Generate QR Code
     qr = qrcode.QRCode(
         version=1,
