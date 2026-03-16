@@ -5,14 +5,16 @@ A sample DevOps capstone application that generates QR codes for submitted URLs.
 Main components
 - Front-end: Next.js application located in `front-end-nextjs` that provides the user interface for submitting URLs and viewing generated QR codes.
 - API: FastAPI-based Python service in the `api` directory that accepts URL submissions, generates QR images, and uploads them to an S3 bucket.
-
+===================================================
+========================================================================
 Repository layout
 - `api/` - FastAPI application, tests, and Python requirements.
 - `front-end-nextjs/` - Next.js source, Dockerfile, and frontend configs.
 - `backend.yaml`, `frontend.yaml` - Kubernetes manifests used for deployment to a cluster.
 - `infrastructure/` - Terraform artifacts for infra provisioning (if used).
 - `aws/` - helper scripts and docs for AWS-related setup.
-
+===============================================================================
+================================================================================
 Quick start (local development)
 
 1) Run the API locally
@@ -28,7 +30,8 @@ uvicorn main:app --reload --host 0.0.0.0 --port 8000
 ```
 
 API will be available at `http://localhost:8000` by default.
-
+===========================================================================
+============================================================================
 2) Run the front-end locally
 
 ```bash
@@ -36,7 +39,8 @@ cd front-end-nextjs
 npm install
 npm run dev
 ```
-
+====================================================================================
+====================================================================================
 Front-end will run at `http://localhost:3000` and should be configured to call the API (check the frontend environment variables in `front-end-nextjs` if needed).
 
 Running with Docker
