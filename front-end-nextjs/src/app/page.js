@@ -7,28 +7,34 @@ export default function Home() {
   const [url, setUrl] = useState('');
   const [qrCodeUrl, setQrCodeUrl] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
 const handleSubmit = async (e) => {
   e.preventDefault();
   setError('');
+  setQrCodeUrl('');
+  const trimmed = url.trim();
+  if (!trimmed) {
+    setError('Please enter a URL');
+    return;
+  }
+  if (!/^https?:\/\//i.test(trimmed)) {
+    setError('URL must start with http:// or https://');
+    return;
+  }
+  setLoading(true);
   try {
-    const encoded = encodeURIComponent(url);
-    const response = await axios.post(`http://localhost:8000/generate-qr/?url=${encoded}`);
-    console.log('response', response);
-    if (!response || !response.data) {
-      console.error('Empty response', response);
-      return;
-    }
-    const { qr_code_url } = response.data;
-    if (!qr_code_url) {
-      console.error('qr_code_url missing', response.data);
+    const response = await axios.post('/api/generate-qr', { url: trimmed });
+    if (!response || !response.data || !response.data.qr_code_url) {
       setError('No QR URL returned from server');
       return;
     }
-    setQrCodeUrl(qr_code_url);
-  } catch (error) {
-    console.error('API error', error?.response?.status, error?.response?.data || error.message);
-    setError(error?.response?.data?.error || error?.message || 'Request failed');
+    setQrCodeUrl(response.data.qr_code_url);
+  } catch (err) {
+    console.error('API error', err?.response?.status, err?.response?.data || err.message);
+    setError(err?.response?.data?.error || err?.message || 'Request failed');
+  } finally {
+    setLoading(false);
   }
 };
   return (
@@ -42,7 +48,7 @@ const handleSubmit = async (e) => {
           placeholder="Enter URL like https://example.com"
           style={styles.input}
         />
-        <button type="submit" style={styles.button}>Generate QR Code</button>
+        <button type="submit" style={styles.button} disabled={loading}>{loading ? 'Generating...' : 'Generate QR Code'}</button>
       </form>
       {error && <div style={{color: 'salmon', marginTop: 12}}>{error}</div>}
       {qrCodeUrl && <img src={qrCodeUrl} alt="QR Code" style={styles.qrCode} />}

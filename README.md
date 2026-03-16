@@ -1,50 +1,108 @@
 # devops-qr-code--
 
-This is the sample application for the DevOps Capstone Project.
-It generates QR Codes for the provided URL, the front-end is in NextJS and the API is written in Python using FastAPI.
+A sample DevOps capstone application that generates QR codes for submitted URLs. The project demonstrates containerization, Kubernetes deployment, CI/CD, and basic cloud storage integration.
 
-## Application
+Main components
+- Front-end: Next.js application located in `front-end-nextjs` that provides the user interface for submitting URLs and viewing generated QR codes.
+- API: FastAPI-based Python service in the `api` directory that accepts URL submissions, generates QR images, and uploads them to an S3 bucket.
+===================================================
+========================================================================
+Repository layout
+- `api/` - FastAPI application, tests, and Python requirements.
+- `front-end-nextjs/` - Next.js source, Dockerfile, and frontend configs.
+- `backend.yaml`, `frontend.yaml` - Kubernetes manifests used for deployment to a cluster.
+- `infrastructure/` - Terraform artifacts for infra provisioning (if used).
+- `aws/` - helper scripts and docs for AWS-related setup.
+===============================================================================
+================================================================================
+Quick start (local development)
+=======================
+1) Run the API locally
 
-**Front-End** - A web application where users can submit URLs.
+```bash
+cd api
+python -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+# create a .env with AWS keys or set environment variables
+# set BUCKET_NAME in environment or main.py as needed
+uvicorn main:app --reload --host 0.0.0.0 --port 8000
+```
 
-**API**: API that receives URLs and generates QR codes. The API stores the QR codes in cloud storage(AWS S3 Bucket).
+API will be available at `http://localhost:8000` by default.
+===========================================================================
+============================================================================
+2) Run the front-end locally
 
-## Running locally
+```bash
+cd front-end-nextjs
+npm install
+npm run dev
+```
+====================================================================================
+====================================================================================
+Front-end will run at `http://localhost:3000` and should be configured to call the API (check the frontend environment variables in `front-end-nextjs` if needed).
 
-### API
+Running with Docker
 
-The API code exists in the `api` directory. You can run the API server locally:
+- Build the API image (example):
 
-- Clone this repo
-- Make sure you are in the `api` directory
-- Create a virtualenv by typing in the following command: `python -m venv .venv`
-- Install the required packages: `pip install -r requirements.txt`
-- Create a `.env` file, and add you AWS Access and Secret key, check  `.env.example`
-- Also, change the BUCKET_NAME to your S3 bucket name in `main.py`
-- Run the API server: `uvicorn main:app --reload`
-- Your API Server should be running on port `http://localhost:8000`
+```bash
+cd api
+docker build -t devops-qr-code-api:local .
+```
 
-### Front-end
+- Build the frontend image:
 
-The front-end code exits in the `front-end-nextjs` directory. You can run the front-end server locally:
+```bash
+cd front-end-nextjs
+docker build -t devops-qr-code-frontend:local .
+```
 
-- Clone this repo
-- Make sure you are in the `front-end-nextjs` directory
-- Install the dependencies: `npm install`
-- Run the NextJS Server: `npm run dev`
-- Your Front-end Server should be running on `http://localhost:3000`
+Kubernetes deployment
 
+- The repository contains `backend.yaml` and `frontend.yaml` which define Deployments/Services for the API and frontend. Apply them with:
 
-## Goal
+```bash
+kubectl apply -f backend.yaml
+kubectl apply -f frontend.yaml
+```
 
-The goal is to get hands-on with DevOps practices like Containerization, CICD and monitoring.
+If you see decoding errors when applying manifests, verify YAML indentation and that top-level `spec` is not nested under `metadata`.
 
-Look at the capstone project for more detials.
+CI/CD
 
-## Author
+- There is a GitHub Actions workflow (see `.github/workflows/build-docker.yml`) that builds Docker images and (optionally) pushes to a registry.
+- To enable automated deploys, configure secrets for your Docker registry and Kubernetes cluster context in your CI provider.
 
-[HM Nomaan](https://github.com/hmnomaan)
+Configuration and environment variables
+- API (in `api/main.py` or `.env`):
+	- `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY` – credentials for S3 access (or rely on IAM roles when running in cloud)
+	- `BUCKET_NAME` – S3 bucket where QR images will be stored
+	- `AWS_REGION` – region of the S3 bucket
+- Frontend: configure API base URL in the Next.js environment variables (check `front-end-nextjs` docs/config files)
 
-## License
+Testing
+- Backend tests: run from the `api` folder (example):
 
-[MIT](./LICENSE)
+```bash
+cd api
+pytest
+```
+
+Contributing
+- Feel free to open issues or PRs. Recommended workflow:
+	1. Fork the repo
+	2. Create a feature branch
+	3. Add tests for behavioral changes
+	4. Open a PR with a clear description and testing steps
+
+Troubleshooting tips
+- If Kubernetes returns errors like "unknown field \"metadata.replicas\"": ensure `spec` is a top-level key under the object (not under `metadata`).
+- If uploads to S3 fail, verify the bucket name, region, and credentials/permissions.
+
+Author
+- HM Nomaan (https://github.com/hmnomaan)
+
+License
+- MIT (see LICENSE)
